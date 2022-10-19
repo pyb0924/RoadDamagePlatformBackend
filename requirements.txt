@@ -1,0 +1,10 @@
+pyjwt=1.7.1
+fastapi=0.65.0
+peewee=3.15.3
+passlib=1.7.4
+psutil=5.9.2
+pydantic=1.5.1
+uvicorn=0.13.4
+pymysql=1.0.2
+python-multipart=0.0.5
+bcrypt=4.0.0
