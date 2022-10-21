@@ -31,7 +31,6 @@ async def api_exception_handler(request: Request, exc: APIException):
         content=exc.detail,
     )
 
-
 @app.middleware("http")
 async def log_middle(request: Request, call_next):
     logger.debug(f"{request.method} {request.url}")

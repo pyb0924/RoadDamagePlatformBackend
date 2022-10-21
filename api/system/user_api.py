@@ -13,6 +13,7 @@ from schema.user import UserAdd, UserUpdatePassward
 
 from service.system.sys_user_service import UserService
 
+
 user_router = APIRouter(prefix="/user", tags=["用户管理"])
 
 user_service = UserService()

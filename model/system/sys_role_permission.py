@@ -11,9 +11,10 @@ from model.common import BaseModel
 
 
 class SysRolePerm(BaseModel):
+    id = BigIntegerField(default=generate_id, null=False, primary_key=True)
     role_id = BigIntegerField(default=generate_id, null=False)
     perm_id = BigIntegerField(default=generate_id, null=False)
 
     class Meta:
         database = db
-        table_name = 'sys_roles'
+        table_name = 'sys_role_permission'

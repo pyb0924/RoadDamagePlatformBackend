@@ -11,7 +11,6 @@ from model.system.sys_user import SysUser
 from common.db import db
 from common.log import logger
 
-
 class UserService:
     sys_user_mapper = SysUserMapper()
     sys_role_mapper = SysRoleMapper()
@@ -85,7 +84,7 @@ class UserService:
         """
         user = self.sys_user_mapper.get_user_by_username(username)
         if user:
-            raise APIException(400, f"用户名已存在")
+           raise APIException(400, f"用户名已存在")
 
         # 新增用户 -- start --
         new_sys_user = SysUser()
