@@ -3,34 +3,24 @@
 # @Author  : Zhexian Lin
 # @File    : main.py
 # @desc    :
+import time
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
 import uvicorn
+from starlette.routing import Match
 
 from api.apis import api_router
 from common.exception import APIException
-from common.db import database as db
+from common.log import logger
 
-app = FastAPI(title="智慧公路养护管理系统后端", openapi_url="/api/openapi.json")
+app = FastAPI(title="智慧公路养护管理系统后端",
+              openapi_url="/api/openapi.json")
 
 
 @app.get("/", tags=["index"])
 def index():
     return "智慧公路养护管理系统后端"
-
-
-# 请求前连接数据库
-@app.on_event("startup")
-def startup():
-    db.connect()
-
-
-# 请求结束后关闭数据库连接
-@app.on_event("shutdown")
-def shutdown():
-    if not db.is_closed():
-        db.close()
 
 
 # 全局API异常响应格式处理
@@ -42,8 +32,32 @@ async def api_exception_handler(request: Request, exc: APIException):
     )
 
 
+@app.middleware("http")
+async def log_middle(request: Request, call_next):
+    logger.debug(f"{request.method} {request.url}")
+    routes = request.app.router.routes
+    logger.debug("Params:")
+    for route in routes:
+        match, scope = route.matches(request)
+        if match == Match.FULL:
+            for name, value in scope["path_params"].items():
+                logger.debug(f"\t{name}: {value}")
+    logger.debug("Headers:")
+    for name, value in request.headers.items():
+        logger.debug(f"\t{name}: {value}")
+
+    start_time = time.time()
+
+    response = await call_next(request)
+
+    process_time = (time.time() - start_time) * 1000
+    formatted_process_time = '{0:.2f}'.format(process_time)
+    logger.debug(f"completed_in={formatted_process_time}ms status_code={response.status_code}")
+
+    return response
+
 # 路由注册
 app.include_router(api_router, prefix="/api")
 
 if __name__ == '__main__':
-    uvicorn.run(app="main:app", host='127.0.0.1', port=8889, reload=True)
+    uvicorn.run(app="main:app", host='127.0.0.1', port=8889, reload=True, )

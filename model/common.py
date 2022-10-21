@@ -10,8 +10,8 @@ from datetime import datetime
 
 class BaseModel(Model):
     is_delete = SmallIntegerField(default=0, help_text="0未删除 1已删除")
-    create_time = DateTimeField(default=datetime.now(), help_text="0未删除 1已删除")
-    update_time = DateTimeField(default=datetime.now(), help_text="0未删除 1已删除")
+    create_time = DateTimeField(default=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), help_text="0未删除 1已删除")
+    update_time = DateTimeField(default=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), help_text="0未删除 1已删除")
 
     def save(self, *args, **kwargs):
         """
@@ -20,5 +20,5 @@ class BaseModel(Model):
         :param kwargs:
         :return:
         """
-        self.update_time = datetime.now()
+        self.update_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         return super(BaseModel, self).save(*args, **kwargs)

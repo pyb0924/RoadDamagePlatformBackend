@@ -3,14 +3,18 @@
 # @Author  : Zhexian Lin
 # @File    : user.py
 # @desc    :
+from typing import Optional, List
+from pydantic import BaseModel, Field
+from schema.common import QueryData, ReadBase
 
 
-from pydantic import BaseModel
+class UserAdd(BaseModel):
+    username: str
+    password: str
+    roles: List[int]
 
 
-class Token(BaseModel):
-    """
-    token schema
-    """
-    access_token: str
-    token_type: str
+class UserUpdatePassward(BaseModel):
+    user_id: str
+    old_password: str
+    password: str

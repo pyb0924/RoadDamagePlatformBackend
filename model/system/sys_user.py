@@ -7,7 +7,7 @@
 from model.common import BaseModel
 from peewee import BigIntegerField, SmallIntegerField, CharField
 from common.snow_flake import generate_id
-from common.db import database
+from common.db import db
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -24,7 +24,7 @@ class SysUser(BaseModel):
     is_active = SmallIntegerField(default=1)
 
     class Meta:
-        database = database
+        database = db
         table_name = 'sys_users'
 
     def convert_pass_to_hash(self, password):
@@ -46,5 +46,3 @@ class SysUser(BaseModel):
         return pwd_context.verify(password, self.password)
 
 
-if __name__ == '__main__':
-    pass
