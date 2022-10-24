@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 10/13/2022 1:53 PM
 # @Author  : Zhexian Lin
-# @File    : login_service.py
+# @File    : sys_login_service.py
 # @desc    :
 
 
@@ -17,7 +17,7 @@ class LoginService:
 
     SECRET_KEY = "ShsUP9qIP2Xui2GpXRY6y74v2JSVS0Q2YOXJ22VjwkI"
 
-    ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
+    ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
     def create_access_token(self, *, data: dict):
         """

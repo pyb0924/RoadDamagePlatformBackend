@@ -16,7 +16,7 @@ class UserLogin(BaseModel):
 class UserAdd(BaseModel):
     username: str
     password: str
-    roles: List[int]
+    permissions: List[int]
 
 
 class UserUpdatePassward(BaseModel):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 10/13/2022 2:17 PM
 # @Author  : Zhexian Lin
-# @File    : login_api.py
+# @File    : sys_login_api.py
 # @desc    :
 
 from fastapi import APIRouter, Depends
@@ -12,7 +12,7 @@ from jwt import PyJWTError
 from common.exception import APIException
 from common.http_handler import create_response
 from schema.user import UserLogin
-from service.system.login_service import LoginService
+from service.system.sys_login_service import LoginService
 
 from common import security
 from api.interceptor import get_db, header_has_authorization
@@ -22,11 +22,11 @@ login_service = LoginService()
 
 
 @login_router.post("/login", name="用户登陆", dependencies=[Depends(get_db)])
-async def login_for_access_token(form_data: UserLogin):
+async def login_for_access_token(user_login: UserLogin):
     """
     登录并获取获取token
     """
-    user = login_service.authenticate_user(form_data.username, form_data.password)
+    user = login_service.authenticate_user(user_login.username, user_login.password)
     if not user:
         raise APIException(406, f"用户名或密码错误")
     if not user.is_active:

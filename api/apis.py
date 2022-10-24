@@ -8,9 +8,9 @@
 from fastapi import APIRouter
 from fastapi import Depends
 
-from api.system.user_api import user_router
+from api.system.sys_user_api import user_router
 from common.db import db, db_state_default
-from api.system.login_api import login_router
+from api.system.sys_login_api import login_router
 
 api_router = APIRouter()
 

@@ -3,9 +3,9 @@
 # @Author  : Zhexian Lin
 # @File    : sys_user_mapper.py
 # @desc    :
-
+from model.system.sys_permission import SysPermission
 from model.system.sys_user import SysUser
-from model.system.sys_user_role import SysUserRole
+from model.system.sys_user_permission import SysUserPermission
 from common.log import logger
 
 
@@ -18,7 +18,7 @@ class SysUserMapper:
         :return:
         """
         try:
-            sys_user = SysUser().get(SysUser.username == username)
+            sys_user = SysUser().get((SysUser.username == username), (SysUser.is_delete == 0))
         except Exception as e:
             logger.error(e)
             # 用户不存在
@@ -32,10 +32,15 @@ class SysUserMapper:
         :return:
         """
         try:
-            sys_user = SysUser.select(SysUser.user_id, SysUser.username, SysUser.is_active, SysUserRole.role_id,
-                                      SysUser.create_time, SysUser.update_time) \
-                .join(SysUserRole, on=(SysUser.user_id == SysUserRole.user_id)) \
-                .where((SysUser.user_id == user_id), (SysUser.is_delete == 0), (SysUserRole.is_delete == 0)) \
+            sys_user = SysUser.select(SysUser.user_id, SysUser.username, SysUser.is_active,
+                                      SysUserPermission.perm_id,
+                                      SysPermission.identifier) \
+                .join(SysUserPermission, on=(SysUser.user_id == SysUserPermission.user_id)) \
+                .join(SysPermission, on=(SysUserPermission.perm_id == SysPermission.perm_id)) \
+                .where((SysUser.user_id == user_id),
+                       (SysUser.is_delete == 0),
+                       (SysUserPermission.is_delete == 0),
+                       (SysPermission.is_delete == 0)) \
                 .dicts()
             sys_user = list(sys_user)
         except Exception as e:
@@ -45,15 +50,9 @@ class SysUserMapper:
         return sys_user
 
     def get_user_by_offset_limit(self, offset, limit):
-        """
-        以用户名查询用户表
-        :param username:
-        :return:
-        """
         try:
-            user_list = SysUser.select(SysUser.user_id, SysUser.username, SysUser.is_active, SysUserRole.role_id,
-                                       SysUser.create_time, SysUser.update_time) \
-                .left_outer_join(SysUserRole, on=(SysUser.user_id == SysUserRole.user_id)) \
+            user_list = SysUser.select(SysUser.user_id, SysUser.username, SysUser.is_active, SysUser.create_time,
+                                       SysUser.update_time) \
                 .where((SysUser.is_delete == 0)).offset(offset).limit(limit) \
                 .dicts()
             user_list = list(user_list)
@@ -67,44 +66,43 @@ class SysUserMapper:
         try:
             sys_user.save(force_insert=True)
         except Exception as e:
-            # 用户名存在
             sys_user = None
             logger.error(e)
         return sys_user
 
-    def check_user_role(self, user_id, role_id):
+    def check_user_permission(self, user_id, perm_id):
         """
-        检查用户角色关联项是否已存在
+        检查用户权限关联项是否已存在
         :param user_id:
         :param role_id:
         :return:
         """
         try:
-            sys_user_role = SysUserRole().select().where((SysUserRole.user_id == user_id),
-                                                         (SysUserRole.role_id == role_id)).get()
-            if sys_user_role:
+            sys_user_permisson = SysUserPermission().select().where((SysUserPermission.user_id == user_id),
+                                                                    (SysUserPermission.perm_id == perm_id)).get()
+            if sys_user_permisson:
                 return True
         except Exception as e:
             logger.error(e)
             return False
 
-    def add_user_role(self, user_id, role_id):
+    def add_user_permission(self, user_id, perm_id):
         """
-        新增用户角色关联项
+        新增用户权限关联项
         :param user_id:
-        :param role_id:
+        :param perm_id:
         :return:
         """
         try:
-            sys_user_role = SysUserRole().create(user_id=user_id, role_id=role_id)
+            sys_user_permission = SysUserPermission().create(user_id=user_id, perm_id=perm_id)
         except Exception as e:
-            sys_user_role = None
+            sys_user_permission = None
             logger.error(e)
-        return sys_user_role
+        return sys_user_permission
 
     def update_user(self):
         """
-        TODO: 实现用户资料更新，例如角色变更，激活状态变更
+        TODO: 实现用户资料更新，例如权限变更，激活状态变更
         :param sys_user:
         :return:
         """
@@ -144,7 +142,3 @@ class SysUserMapper:
             # 用户不存在
             sys_user = None
         return sys_user
-
-
-if __name__ == '__main__':
-    pass

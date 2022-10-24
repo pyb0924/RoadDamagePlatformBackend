@@ -5,15 +5,16 @@
 # @desc    :
 from common.exception import APIException
 from common.utils import datetime_format
-from mapper.system.sys_role_mapper import SysRoleMapper
+from mapper.system.sys_permission_mapper import SysPermissionMapper
 from mapper.system.sys_user_mapper import SysUserMapper
 from model.system.sys_user import SysUser
 from common.db import db
 from common.log import logger
 
+
 class UserService:
     sys_user_mapper = SysUserMapper()
-    sys_role_mapper = SysRoleMapper()
+    sys_permission_mapper = SysPermissionMapper()
 
     def get_user_by_offset_limit(self, offset, limit):
         """
@@ -28,18 +29,11 @@ class UserService:
         # 数据库查询数据解析重组
         user_list_dict = dict(user_id=dict())
         for u in user_list:
-            if u["user_id"] not in user_list_dict:
-                user_list_dict[u["user_id"]] = dict(user_id=str(u['user_id']),
-                                                    username=u['username'],
-                                                    is_active=u['is_active'],
-                                                    roles=[],
-                                                    create_time=datetime_format(u['create_time']),
-                                                    update_time=datetime_format(u['update_time']))
-                if u['role_id']:  # 角色非空时才加入，否则里会在列表中插入None
-                    user_list_dict[u["user_id"]]["roles"].append(str(u['role_id']))
-            else:
-                if u['role_id']:
-                    user_list_dict[u["user_id"]]["roles"].append(str(u['role_id']))
+            user_list_dict[u["user_id"]] = dict(user_id=str(u['user_id']),
+                                                username=u['username'],
+                                                is_active=u['is_active'],
+                                                create_time=datetime_format(u['create_time']),
+                                                update_time=datetime_format(u['update_time']))
         user_list = [v for _, v in user_list_dict.items() if v]
 
         return user_list
@@ -54,37 +48,36 @@ class UserService:
         if len(user_list) == 0:
             return {}
         # 数据库查询数据解析重组 -- start --
-        user_dict = dict(user_id=None, username=None, is_active=None, roles=[])
+        user_dict = dict(user_id=None, username=None, is_active=None, permission_ids=[], permissions=[])
         for u in user_list:
             user_dict["user_id"] = str(u['user_id'])
             user_dict["username"] = u['username']
             user_dict["is_active"] = u['is_active']
-            user_dict["create_time"] = datetime_format(u['create_time'])
-            user_dict["update_time"] = datetime_format(u['update_time'])
-            user_dict["roles"].append(str(u['role_id']))
+            user_dict["permission_ids"].append(str(u['perm_id']))
+            user_dict["permissions"].append(str(u['identifier']))
         # 数据库查询数据解析重组 -- end --
         return user_dict
 
     @db.atomic()
-    def add_user(self, username, password, roles):
+    def add_user(self, username, password, permissions):
         """
-        新增用户方法，前端提供用户名、密码、角色数组
+        新增用户方法，前端提供用户名、密码、权限ID数组
 
         新增用户保证是原子性行为，若在流程中出现任何异常，都不会更新数据库
         流程：
             1. 检查用户名是否重名，重名则抛出异常，不重名则进入2
             2. 创建用户
-            3. 遍历角色数组，先检查角色是否存在，若不存在，直接抛出异常，存在则进入4
-            4. 更新sys_user_role_table
+            3. 遍历权限ID数组，先检查权限是否存在，若不存在，直接抛出异常，存在则进入4
+            4. 更新sys_user_permission_table
 
         :param username:
         :param password:
-        :param roles:
+        :param permissions:
         :return:
         """
         user = self.sys_user_mapper.get_user_by_username(username)
         if user:
-           raise APIException(400, f"用户名已存在")
+            raise APIException(400, f"用户名已存在")
 
         # 新增用户 -- start --
         new_sys_user = SysUser()
@@ -93,13 +86,14 @@ class UserService:
         self.sys_user_mapper.add_user(new_sys_user)
         # 新增用户 -- end --
 
-        # 依次新增用户角色关联 -- start --
+        # 依次新增用户权限关联 -- start --
         user_id = new_sys_user.user_id
-        for r in roles:
-            if not self.sys_role_mapper.get_role_by_id(r):
-                raise APIException(400, f"角色不存在")
-            self.sys_user_mapper.add_user_role(user_id, r)
-        # 依次新增用户角色关联 -- start --
+        for p in permissions:
+            if not self.sys_permission_mapper.get_permission_by_id(p):
+                raise APIException(400, f"权限不存在")
+            self.sys_user_mapper.add_user_permission(user_id, p)
+        # 依次新增用户权限关联 -- start --
+        pass
 
     def reset_password(self, user_id, old_password, password):
         """
@@ -125,3 +119,8 @@ class UserService:
         except Exception as e:
             logger.error(e)
             raise APIException(400, f"用户删除失败")
+
+
+if __name__ == '__main__':
+    r = UserService().get_user_by_user_id(1580216098635255808)
+    print(r)

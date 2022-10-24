@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 10/19/2022 4:38 PM
 # @Author  : Zhexian Lin
-# @File    : user_api.py
+# @File    : sys_user_api.py
 # @desc    :
 from fastapi import APIRouter, Depends, Query
 
@@ -39,7 +39,7 @@ async def user_info(user_id: int):
 @user_router.post("", summary="用户新增",
                   dependencies=[Depends(get_db), Depends(header_has_authorization), Depends(oauth2_scheme)])
 async def user_info(user_add: UserAdd):
-    user_service.add_user(user_add.username, user_add.password, user_add.roles)
+    user_service.add_user(user_add.username, user_add.password, user_add.permissions)
     return create_response(200, "新增用户成功", {})
 
 
