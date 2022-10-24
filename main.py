@@ -5,17 +5,30 @@
 # @desc    :
 import time
 
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 import uvicorn
+from fastapi.middleware import Middleware
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.routing import Match
 
 from api.apis import api_router
 from common.exception import APIException
 from common.log import logger
 
+middlewares = [
+    Middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    ),
+]
+
 app = FastAPI(title="智慧公路养护管理系统后端",
-              openapi_url="/api/openapi.json")
+              openapi_url="/api/openapi.json",
+              middleware=middlewares)
 
 
 @app.get("/", tags=["index"])

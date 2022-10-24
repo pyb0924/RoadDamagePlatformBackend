@@ -46,7 +46,7 @@ class UserService:
 
     def get_user_by_user_id(self, user_id: int):
         """
-        为API接口提供查询单个用户信息
+        为API接口提供查询单个用户信息及关联的角色信息
         :param id:
         :return:
         """
@@ -112,3 +112,16 @@ class UserService:
             self.sys_user_mapper.reset_passward_by_user_id(user_id, password)
         else:
             raise APIException(406, f"旧密码错误")
+
+    def delete_user(self, user_id):
+        try:
+            sys_user: SysUser = SysUser.get(SysUser.user_id == user_id)
+        except Exception as e:
+            logger.error(e)
+            raise APIException(404, f"用户不存在")
+        sys_user.is_delete = 1
+        try:
+            sys_user.save()
+        except Exception as e:
+            logger.error(e)
+            raise APIException(400, f"用户删除失败")

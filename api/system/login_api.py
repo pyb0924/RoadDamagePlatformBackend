@@ -11,6 +11,7 @@ from jwt import PyJWTError
 
 from common.exception import APIException
 from common.http_handler import create_response
+from schema.user import UserLogin
 from service.system.login_service import LoginService
 
 from common import security
@@ -21,7 +22,7 @@ login_service = LoginService()
 
 
 @login_router.post("/login", name="用户登陆", dependencies=[Depends(get_db)])
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(form_data: UserLogin):
     """
     登录并获取获取token
     """

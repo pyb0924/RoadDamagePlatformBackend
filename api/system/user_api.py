@@ -49,3 +49,10 @@ async def reset_passward(user_update_password: UserUpdatePassward):
     user_service.reset_password(user_update_password.user_id, user_update_password.old_password,
                                 user_update_password.password)
     return create_response(200, "密码修改成功", {})
+
+
+@user_router.delete("/{user_id}", summary="用户删除",
+                    dependencies=[Depends(get_db), Depends(header_has_authorization), Depends(oauth2_scheme)])
+async def delete_user(user_id: int):
+    user_service.delete_user(user_id)
+    return create_response(200, "用户删除成功", {})

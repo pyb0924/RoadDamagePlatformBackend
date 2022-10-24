@@ -8,6 +8,11 @@ from pydantic import BaseModel, Field
 from schema.common import QueryData, ReadBase
 
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+
 class UserAdd(BaseModel):
     username: str
     password: str
