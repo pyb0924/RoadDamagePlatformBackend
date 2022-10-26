@@ -11,20 +11,22 @@ from common.log import logger
 class SysPermissionMapper:
     def get_permission_by_id(self, perm_id):
         try:
-            sys_role = SysPermission.get(SysPermission.perm_id == perm_id)
+            sys_role = SysPermission.get((SysPermission.perm_id == perm_id), (SysPermission.is_delete == 0))
         except Exception as e:
             logger.error(e)
             sys_role = None
         return sys_role
 
-    def get_permission(self):
+    def get_permission_by_offset_limit(self, offset, limit):
         try:
-            sys_permission = SysPermission.select()
+            sys_permission_list = SysPermission.select().where(SysPermission.is_delete == 0).offset(offset).limit(limit) \
+                .dicts()
+            sys_permission_list = list(sys_permission_list)
+
         except Exception as e:
             logger.error(e)
-            # 用户不存在
-            sys_role = None
-        return sys_permission
+            sys_permission_list = []
+        return sys_permission_list
 
     def add_permission(self, sys_permission):
         try:

@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Query
 
 from common.http_handler import create_response
 from common.security import oauth2_scheme
-from api.interceptor import get_db, header_has_authorization
+from api.interceptor import get_db, has_authorization
 from common.exception import APIException
 from schema.user import UserAdd, UserUpdatePassward
 
@@ -20,7 +20,7 @@ user_service = UserService()
 
 
 @user_router.get("", summary="用户列表",
-                 dependencies=[Depends(get_db), Depends(header_has_authorization), Depends(oauth2_scheme)])
+                 dependencies=[Depends(get_db), Depends(has_authorization)])
 async def user_list(offset: int = Query(default=1, description="偏移量-页码"),
                     limit: int = Query(default=10, description="数据量")):
     users = user_service.get_user_by_offset_limit(offset, limit)
@@ -28,7 +28,7 @@ async def user_list(offset: int = Query(default=1, description="偏移量-页码
 
 
 @user_router.get("/{user_id}", summary="用户信息",
-                 dependencies=[Depends(get_db), Depends(header_has_authorization), Depends(oauth2_scheme)])
+                 dependencies=[Depends(get_db), Depends(has_authorization)])
 async def user_info(user_id: int):
     user = user_service.get_user_by_user_id(user_id)
     if not user:
@@ -37,14 +37,14 @@ async def user_info(user_id: int):
 
 
 @user_router.post("", summary="用户新增",
-                  dependencies=[Depends(get_db), Depends(header_has_authorization), Depends(oauth2_scheme)])
+                  dependencies=[Depends(get_db), Depends(has_authorization)])
 async def user_info(user_add: UserAdd):
     user_service.add_user(user_add.username, user_add.password, user_add.permissions)
     return create_response(200, "新增用户成功", {})
 
 
 @user_router.put("/updatepwd", summary="用户密码更新",
-                 dependencies=[Depends(get_db), Depends(header_has_authorization), Depends(oauth2_scheme)])
+                 dependencies=[Depends(get_db), Depends(has_authorization)])
 async def reset_passward(user_update_password: UserUpdatePassward):
     user_service.reset_password(user_update_password.user_id, user_update_password.old_password,
                                 user_update_password.password)
@@ -52,7 +52,7 @@ async def reset_passward(user_update_password: UserUpdatePassward):
 
 
 @user_router.delete("/{user_id}", summary="用户删除",
-                    dependencies=[Depends(get_db), Depends(header_has_authorization), Depends(oauth2_scheme)])
+                    dependencies=[Depends(get_db), Depends(has_authorization)])
 async def delete_user(user_id: int):
     user_service.delete_user(user_id)
     return create_response(200, "用户删除成功", {})

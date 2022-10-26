@@ -15,14 +15,14 @@ from schema.user import UserLogin
 from service.system.sys_login_service import LoginService
 
 from common import security
-from api.interceptor import get_db, header_has_authorization
+from api.interceptor import get_db, has_authorization
 
 login_router = APIRouter()
 login_service = LoginService()
 
 
 @login_router.post("/login", name="用户登陆", dependencies=[Depends(get_db)])
-async def login_for_access_token(user_login: UserLogin):
+async def login_for_access_token(user_login: OAuth2PasswordRequestForm = Depends()):
     """
     登录并获取获取token
     """
@@ -36,7 +36,7 @@ async def login_for_access_token(user_login: UserLogin):
                                              "token_type": "bearer"})
 
 
-@login_router.post("/refresh", name="刷新token", dependencies=[Depends(header_has_authorization)])
+@login_router.post("/refresh", name="刷新token", dependencies=[Depends(has_authorization)])
 async def fresh_token(token: str = Depends(security.oauth2_scheme)):
     """
     刷新token
@@ -54,5 +54,6 @@ async def fresh_token(token: str = Depends(security.oauth2_scheme)):
     if user is None:
         raise APIException(406, "token错误")
     access_token = login_service.create_access_token(data={"sub": user.username})
-    return create_response(200, "token刷新成功", {"user_id": str(user.user_id), "access_token": access_token.decode(),
+    return create_response(200, "token刷新成功", {"user_id": str(user.user_id),
+                                                  "access_token": access_token.decode(),
                                                   "token_type": "bearer"})

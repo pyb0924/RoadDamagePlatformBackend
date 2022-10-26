@@ -6,8 +6,7 @@
 
 from datetime import datetime
 from pydantic import BaseModel, Field
-from typing import Generic, TypeVar
-from pydantic.generics import GenericModel
+from typing import TypeVar
 
 T = TypeVar("T")
 

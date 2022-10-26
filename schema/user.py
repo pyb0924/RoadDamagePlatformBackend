@@ -19,6 +19,11 @@ class UserAdd(BaseModel):
     permissions: List[int]
 
 
+class UserEdit(BaseModel):
+    user_id: str
+    permissions: List[str]
+
+
 class UserUpdatePassward(BaseModel):
     user_id: str
     old_password: str

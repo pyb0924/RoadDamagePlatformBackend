@@ -21,7 +21,7 @@ class SysUser(BaseModel):
     avatar = CharField(max_length=32)
     email = CharField(max_length=32)
     phone = CharField(max_length=11)
-    is_active = SmallIntegerField(default=1)
+    is_active = SmallIntegerField(default=1, help_text="0未激活 1已激活")
 
     class Meta:
         database = db
