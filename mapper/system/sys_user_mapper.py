@@ -33,14 +33,12 @@ class SysUserMapper:
         """
         try:
             sys_user = SysUser.select(SysUser.user_id, SysUser.username, SysUser.is_active,
-                                      SysUserPermission.perm_id,
+                                      SysPermission.perm_id,
                                       SysPermission.identifier) \
-                .join(SysUserPermission, on=(SysUser.user_id == SysUserPermission.user_id)) \
-                .join(SysPermission, on=(SysUserPermission.perm_id == SysPermission.perm_id)) \
+                .left_outer_join(SysUserPermission, on=(SysUser.user_id == SysUserPermission.user_id)) \
+                .left_outer_join(SysPermission, on=(SysUserPermission.perm_id == SysPermission.perm_id)) \
                 .where((SysUser.user_id == user_id),
-                       (SysUser.is_delete == 0),
-                       (SysUserPermission.is_delete == 0),
-                       (SysPermission.is_delete == 0)) \
+                       (SysUser.is_delete == 0)) \
                 .dicts()
             sys_user = list(sys_user)
         except Exception as e:
@@ -142,3 +140,8 @@ class SysUserMapper:
             # 用户不存在
             sys_user = None
         return sys_user
+
+
+if __name__ == '__main__':
+    r = SysUserMapper().get_user_by_user_id(1584521618812702720)
+    print(r)

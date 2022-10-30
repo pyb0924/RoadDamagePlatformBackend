@@ -10,7 +10,7 @@ from api.interceptor import get_db, has_authorization
 from common.http_handler import create_response
 from service.system.sys_permission_service import PermissionService
 
-perm_router = APIRouter(prefix="/perm", tags=["权限管理"])
+perm_router = APIRouter(prefix="/permission", tags=["权限管理"])
 sys_permission_service = PermissionService()
 
 

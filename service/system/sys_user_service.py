@@ -14,6 +14,7 @@ from common.log import logger
 
 class UserService:
     sys_user_mapper = SysUserMapper()
+    sys_user = SysUser()
     sys_permission_mapper = SysPermissionMapper()
 
     def get_user_by_offset_limit(self, offset, limit):
@@ -24,7 +25,8 @@ class UserService:
         :return:
         """
         skip = (offset - 1) * limit
-        user_list = self.sys_user_mapper.get_user_by_offset_limit(skip, limit)
+        user_list = self.sys_user_mapper.get_user_by_offset_limit(skip, limit)  # 分页查询用户信息
+        total_num = self.sys_user.select().count()  # 查询用户总数
 
         # 数据库查询数据解析重组
         user_list_dict = dict(user_id=dict())
@@ -36,9 +38,9 @@ class UserService:
                                                 update_time=datetime_format(u['update_time']))
         user_list = [v for _, v in user_list_dict.items() if v]
 
-        return user_list
+        return {"total": total_num, "user_list": user_list}
 
-    def get_user_by_user_id(self, user_id: int):
+    def get_user_by_user_id(self, user_id: str):
         """
         为API接口提供查询单个用户信息及关联的角色信息
         :param id:
@@ -53,8 +55,9 @@ class UserService:
             user_dict["user_id"] = str(u['user_id'])
             user_dict["username"] = u['username']
             user_dict["is_active"] = u['is_active']
-            user_dict["permission_ids"].append(str(u['perm_id']))
-            user_dict["permissions"].append(str(u['identifier']))
+            if u['perm_id']:
+                user_dict["permission_ids"].append(str(u['perm_id']))
+                user_dict["permissions"].append(u['identifier'])
         # 数据库查询数据解析重组 -- end --
         return user_dict
 
@@ -122,5 +125,5 @@ class UserService:
 
 
 if __name__ == '__main__':
-    r = UserService().get_user_by_user_id(1580216098635255808)
+    r = UserService().get_user_by_user_id(1584521618812702720)
     print(r)
