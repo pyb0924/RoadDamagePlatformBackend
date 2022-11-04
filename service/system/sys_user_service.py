@@ -26,7 +26,7 @@ class UserService:
         """
         skip = (offset - 1) * limit
         user_list = self.sys_user_mapper.get_user_by_offset_limit(skip, limit)  # 分页查询用户信息
-        total_num = self.sys_user.select().count()  # 查询用户总数
+        total_num = self.sys_user.select().where(SysUser.is_delete == 0).count()  # 查询用户总数
 
         # 数据库查询数据解析重组
         user_list_dict = dict(user_id=dict())
@@ -40,7 +40,7 @@ class UserService:
 
         return {"total": total_num, "user_list": user_list}
 
-    def get_user_by_user_id(self, user_id: str):
+    def get_user_by_user_id(self, user_id: int):
         """
         为API接口提供查询单个用户信息及关联的角色信息
         :param id:
@@ -96,7 +96,6 @@ class UserService:
                 raise APIException(400, f"权限不存在")
             self.sys_user_mapper.add_user_permission(user_id, p)
         # 依次新增用户权限关联 -- start --
-        pass
 
     def reset_password(self, user_id, old_password, password):
         """
@@ -123,7 +122,38 @@ class UserService:
             logger.error(e)
             raise APIException(400, f"用户删除失败")
 
+    @db.atomic()
+    def edit_user_status_permissions(self, user_id, is_active, permission_ids):
+        try:
+            user: SysUser = self.sys_user.select().where((SysUser.user_id == user_id) &
+                                                         (SysUser.is_delete == 0)).get()
+        except Exception as e:
+            logger.error(e)
+            raise APIException(404, f"用户不存在")
+        user.is_active = is_active
+        try:
+            user.save()
+        except Exception as e:
+            logger.error(e)
+            raise APIException(406, f"用户状态变更失败")
+        current_user_permission_ids = self.sys_user_mapper.get_user_permission_ids(user_id)
+        print("current_user_permission_ids:", current_user_permission_ids)
+        print("permission_ids:", permission_ids)
+        try:
+            for perm_id in current_user_permission_ids:
+                if perm_id not in permission_ids:
+                    # if self.sys_user_mapper.check_user_permission(user_id, perm_id):
+                    self.sys_user_mapper.delete_user_permission(user_id, perm_id)
+
+            for perm_id in permission_ids:
+                if perm_id not in current_user_permission_ids:
+                    # if not self.sys_user_mapper.check_user_permission(user_id, perm_id):
+                    self.sys_user_mapper.add_user_permission(user_id, perm_id)
+        except Exception as e:
+            logger.error(e)
+            raise APIException(406, f"用户权限变更失败")
+
 
 if __name__ == '__main__':
-    r = UserService().get_user_by_user_id(1584521618812702720)
+    r = UserService().edit_user_status_permissions(1584521618812702720)
     print(r)

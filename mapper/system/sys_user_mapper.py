@@ -3,6 +3,7 @@
 # @Author  : Zhexian Lin
 # @File    : sys_user_mapper.py
 # @desc    :
+from common.exception import APIException
 from model.system.sys_permission import SysPermission
 from model.system.sys_user import SysUser
 from model.system.sys_user_permission import SysUserPermission
@@ -38,23 +39,26 @@ class SysUserMapper:
                 .left_outer_join(SysUserPermission, on=(SysUser.user_id == SysUserPermission.user_id)) \
                 .left_outer_join(SysPermission, on=(SysUserPermission.perm_id == SysPermission.perm_id)) \
                 .where((SysUser.user_id == user_id),
-                       (SysUser.is_delete == 0)) \
+                       (SysUser.is_delete == 0),
+                       ((SysUserPermission.is_delete == None) |
+                        (SysUserPermission.is_delete == 0)),
+                       ((SysPermission.is_delete == None) |
+                        (SysPermission.is_delete == 0))) \
                 .dicts()
             sys_user = list(sys_user)
         except Exception as e:
             logger.error(e)
             # 用户不存在
-            sys_user = None
+            sys_user = []
         return sys_user
 
     def get_user_by_offset_limit(self, offset, limit):
         try:
             user_list = SysUser.select(SysUser.user_id, SysUser.username, SysUser.is_active, SysUser.create_time,
                                        SysUser.update_time) \
-                .where((SysUser.is_delete == 0)).offset(offset).limit(limit) \
-                .dicts()
+                .where((SysUser.is_delete == 0)) \
+                .limit(limit).offset(offset).dicts()
             user_list = list(user_list)
-
         except Exception as e:
             logger.error(e)
             user_list = []
@@ -68,6 +72,17 @@ class SysUserMapper:
             logger.error(e)
         return sys_user
 
+    def get_user_permission_ids(self, user_id):
+        try:
+            sys_user_permisson = SysUserPermission().select(SysUserPermission.perm_id).where(
+                (SysUserPermission.user_id == user_id) &
+                (SysUserPermission.is_delete == 0)).tuples()
+            sys_user_permisson = [sup[0] for sup in list(sys_user_permisson)]
+            return sys_user_permisson
+        except Exception as e:
+            logger.error(e)
+            return []
+
     def check_user_permission(self, user_id, perm_id):
         """
         检查用户权限关联项是否已存在
@@ -77,7 +92,8 @@ class SysUserMapper:
         """
         try:
             sys_user_permisson = SysUserPermission().select().where((SysUserPermission.user_id == user_id),
-                                                                    (SysUserPermission.perm_id == perm_id)).get()
+                                                                    (SysUserPermission.perm_id == perm_id),
+                                                                    (SysUserPermission.is_delete == 0)).get()
             if sys_user_permisson:
                 return True
         except Exception as e:
@@ -97,6 +113,18 @@ class SysUserMapper:
             sys_user_permission = None
             logger.error(e)
         return sys_user_permission
+
+    def delete_user_permission(self, user_id, perm_id):
+        try:
+            sys_user_permission: SysUserPermission = SysUserPermission() \
+                .select() \
+                .where((SysUserPermission.user_id == user_id),
+                       (SysUserPermission.perm_id == perm_id)).get()
+            sys_user_permission.delete_instance()
+        except Exception as e:
+            logger.error(e)
+            raise APIException(406, "删除用户权限失败")
+        return True
 
     def update_user(self):
         """
@@ -143,5 +171,5 @@ class SysUserMapper:
 
 
 if __name__ == '__main__':
-    r = SysUserMapper().get_user_by_user_id(1584521618812702720)
+    r = SysUserMapper().get_user_permission_ids(1580216098635255808)
     print(r)

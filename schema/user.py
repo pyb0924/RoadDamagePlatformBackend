@@ -20,8 +20,8 @@ class UserAdd(BaseModel):
 
 
 class UserEdit(BaseModel):
-    user_id: str
-    permissions: List[str]
+    is_active: int
+    permission_ids: List[str]
 
 
 class UserUpdatePassward(BaseModel):

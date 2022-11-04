@@ -9,7 +9,7 @@ from common.http_handler import create_response
 from common.security import oauth2_scheme
 from api.interceptor import get_db, has_authorization
 from common.exception import APIException
-from schema.user import UserAdd, UserUpdatePassward
+from schema.user import UserAdd, UserUpdatePassward, UserEdit
 
 from service.system.sys_user_service import UserService
 
@@ -41,6 +41,13 @@ async def user_info(user_id: int):
 async def user_info(user_add: UserAdd):
     user_service.add_user(user_add.username, user_add.password, user_add.permissions)
     return create_response(200, "新增用户成功", {})
+
+
+@user_router.put("/updateinfo/{user_id}", summary="用户状态、权限变更",
+                 dependencies=[Depends(get_db), Depends(has_authorization)])
+async def user_info(user_id: str, user_edit: UserEdit):
+    user_service.edit_user_status_permissions(user_id, user_edit.is_active, user_edit.permission_ids)
+    return create_response(200, "变更用户状态、权限成功", {})
 
 
 @user_router.put("/updatepwd", summary="用户密码更新",

@@ -17,13 +17,14 @@ class PermissionService:
         """
         try:
             sys_permission_list = list(
-                SysPermission().select(SysPermission.perm_name, SysPermission.perm_id, SysPermission.perm_pid).where(
+                SysPermission().select(SysPermission.perm_name.alias("title"), SysPermission.perm_id.alias("key"),
+                                       SysPermission.perm_pid).where(
                     SysPermission.is_delete == 0).dicts())
-            sys_permission_list_map = {sp["perm_id"]: sp for sp in sys_permission_list}
+            sys_permission_list_map = {sp["key"]: sp for sp in sys_permission_list}
             arr = []
             for menu in sys_permission_list:
                 # 有父级
-                menu["perm_id"] = str(menu["perm_id"])
+                menu["key"] = str(menu["key"])
                 if mid := menu.get("perm_pid"):
                     # 有子项的情况
                     if result := sys_permission_list_map[mid].get("children"):
