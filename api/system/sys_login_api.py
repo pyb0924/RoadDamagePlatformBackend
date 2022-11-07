@@ -11,11 +11,10 @@ from jwt import PyJWTError
 
 from common.exception import APIException
 from common.http_handler import create_response
-from schema.user import UserLogin
 from service.system.sys_login_service import LoginService
 
 from common import security
-from api.interceptor import get_db, has_authorization
+from api.interceptor import get_db, AuthenticationChecker
 
 login_router = APIRouter()
 login_service = LoginService()
@@ -32,11 +31,12 @@ async def login_for_access_token(user_login: OAuth2PasswordRequestForm = Depends
     if not user.is_active:
         raise APIException(406, f"{user.username}未激活")
     access_token = login_service.create_access_token(data={"sub": user.username})
+
     return create_response(200, "登录成功", {"user_id": str(user.user_id), "access_token": access_token.decode(),
                                              "token_type": "bearer"})
 
 
-@login_router.post("/refresh", name="刷新token", dependencies=[Depends(has_authorization)])
+@login_router.post("/refresh", name="刷新token", dependencies=[Depends(AuthenticationChecker)])
 async def fresh_token(token: str = Depends(security.oauth2_scheme)):
     """
     刷新token
