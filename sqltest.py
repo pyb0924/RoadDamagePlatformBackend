@@ -3,11 +3,13 @@ from fastapi import FastAPI, File, UploadFile
 from typing import List
 #import snowflake.client
 import peewee
+from sys_event import *
 import imagetest
 from snow_flake import generate_id
+from datetime import datetime
 
+print(1)
 app = FastAPI()
-
 image_path = './image/'
 seg_image_path = './seg_image/'
 now_image_path = './'
@@ -40,15 +42,25 @@ async def get_image(type:int,longitude:float,latitude:float,position:str,user:st
     event_id = generate_id()
     log_id = generate_id()
 
+    #cursor.execute("insert into event values (%s,%s,%s,%s,%s,%s)",[event_id,type,longitude,latitude,position,0])
+    Event.insert(event_id=event_id,
+                 type=type,
+                 longitude=longitude,
+                 latitude=latitude,
+                 position=position,
+                 status=0).execute()
+
+    #cursor.execute("insert into log values (%s,%s,now(),%s,%s,%s,%s)", [log_id, event_id, user, 1, None, notes])
+    Log.insert( log_id = log_id,
+                event_id = event_id,
+                datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                user = user,
+                new_status = 1,
+                old_status = None,
+                notes = notes).execute()
+
     cursor = db.cursor()
-    try:
-        cursor.execute("insert into event values (%s,%s,%s,%s,%s,%s)",[event_id,type,longitude,latitude,position,0])
-        cursor.execute("insert into log values (%s,%s,now(),%s,%s,%s,%s)", [log_id, event_id, user, 1, None, notes])
-        cursor.executemany(f"insert into img values (%s,'{log_id}','{event_id}')",filenamelist)
-        db.commit()
-    except:
-        db.rollback()
-        return '失败'
+    cursor.executemany(f"insert into img values (%s,'{log_id}','{event_id}')",filenamelist)
     cursor.close()
     return '成功'
 
@@ -74,10 +86,10 @@ async def get_image(type:int=None,min_longitude:float=None,max_longitude:float=N
         param.append(max_latitude)
     if position is not None:
         if f:
-            sqlcode += " where positon like '%%s%'"
+            sqlcode += ' where positon like %s"%%"'
             f = False
         else:
-            sqlcode += " and positon like '%%s%'"
+            sqlcode += ' and positon like %s"%%"'
         param.append(status)
     if status is not None:
         if f:
@@ -85,12 +97,18 @@ async def get_image(type:int=None,min_longitude:float=None,max_longitude:float=N
         else:
             sqlcode += " and status=%s"
         param.append(status)
-    cursor = db.cursor()
-    cursor.execute(sqlcode,param)
-    result = cursor.fetchall()
-    cursor.close()
-    db.close()
-    return result
+
+    query = Event.raw(sqlcode,param).dicts()
+    event_list = []
+    for i in query:
+        print(i)
+        event_list.append(i)
+    #cursor = db.cursor()
+    #cursor.execute(sqlcode,param)
+    #result = cursor.fetchall()
+    #cursor.close()
+    #db.close()
+    return event_list
 
 '''
 @app.post("/update_image",dependencies=[Depends(get_db)])#上传当前养护进度图片
@@ -173,4 +191,4 @@ async def get_image(event_id:str):
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app,host='127.0.0.1',port=8000,debug=True)
+    uvicorn.run(app,host='127.0.0.1',port=8000)
