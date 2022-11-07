@@ -115,9 +115,8 @@ class UserService:
         except Exception as e:
             logger.error(e)
             raise APIException(404, f"用户不存在")
-        sys_user.is_delete = 1
         try:
-            sys_user.save()
+            sys_user.delete_instance()
         except Exception as e:
             logger.error(e)
             raise APIException(400, f"用户删除失败")

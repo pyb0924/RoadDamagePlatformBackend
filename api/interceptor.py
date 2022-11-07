@@ -60,6 +60,8 @@ class AuthenticationChecker:
         # identifier不为None时, 检查该用户是否拥有该权限
         if self.identifier is not None:
             perm_list = redis_manager.get(user.user_id)
+            if perm_list is None:
+                raise APIException(406, "无权访问")
             perm_list = json.loads(perm_list)
             if self.identifier not in perm_list:
                 raise APIException(406, "无权访问")
