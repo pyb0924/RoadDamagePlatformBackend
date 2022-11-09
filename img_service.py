@@ -95,7 +95,7 @@ def valid(old_status, status):
 
 
 @db.atomic()
-def update_status(event_id, status, user, notes, filenamelist):
+def update_status(event_id, status, user, notes, filenamelist = None):
     old_status = Event.select().where(Event.event_id == event_id)[0].status
     if valid(old_status, status):
         Event.update(status=status).where(Event.event_id == event_id).execute()

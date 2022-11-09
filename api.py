@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi import FastAPI, File, UploadFile
-from typing import List
+from typing import List, Union, Optional
 import peewee
 from sys_event import *
 from snow_flake import generate_id
@@ -9,7 +9,6 @@ import img_service
 from exception import APIException
 from http_handler import create_response
 from pydantic import BaseModel
-from typing import Union
 
 app = FastAPI()
 image_path = './image/'
@@ -58,32 +57,39 @@ async def search_event(type: int = None, min_longitude: float = None, max_longit
     try:
         event_list = img_service.search_event(type, min_longitude, max_longitude, min_latitude, max_latitude, position,
                                               status)
-        return create_response(200, "新建养护事件成功", event_list)
+        return create_response(200, "查询事件成功", event_list)
     except:
         raise APIException(404, "事件信息输入不全或格式错误")
 
 
-@app.put("/event", dependencies=[Depends(get_db)])  # 修改事件状态
-async def update_event(event_id: str, status: int, user: str, notes: str, #file:Union[UploadFile, None] = None):
-                        file: List[UploadFile] = File(default=None)):
-        print(1)
-    # try:
-        filenamelist = None
-        if file[0] is not None:
-            filenamelist = []
-            for a in file:
-                img_id = generate_id()
-                filenamelist.append(img_id)
-                path = image_path + f'{img_id}' + '.jpg'
-                with open(path, 'wb') as f:
-                    f.write(await a.read())
+@app.put("/event/{event_id}", dependencies=[Depends(get_db)])  # 修改事件状态
+async def update_event(event_id: str, status: int, user: str, notes: str,  file: List[UploadFile] = File(...)):
+    try:
+        filenamelist = []
+        for a in file:
+            img_id = generate_id()
+            filenamelist.append(img_id)
+            path = image_path + f'{img_id}' + '.jpg'
+            with open(path, 'wb') as f:
+                f.write(await a.read())
         p = img_service.update_status(event_id, status, user, notes, filenamelist)
         if p:
             return create_response(200, "事件状态修改成功", {})
         else:
             raise APIException(404, "非法修改状态")
-    # except:
-    #     raise APIException(404, "事件信息输入不全或格式错误")
+    except:
+        raise APIException(404, "事件信息输入不全或格式错误")
+
+@app.put("/event/WithOutImg/{event_id}", dependencies=[Depends(get_db)])  # 修改事件状态
+async def update_event(event_id: str, status: int, user: str, notes: str):
+    try:
+        p = img_service.update_status(event_id, status, user, notes)
+        if p:
+            return create_response(200, "事件状态修改成功", {})
+        else:
+            raise APIException(404, "非法修改状态")
+    except:
+        raise APIException(404, "事件信息输入不全或格式错误")
 
 
 @app.get("/event/log/{log_id}", dependencies=[Depends(get_db)])  # 获得日志对应图片链接
