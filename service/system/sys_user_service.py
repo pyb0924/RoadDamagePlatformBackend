@@ -140,12 +140,10 @@ class UserService:
         print("permission_ids:", permission_ids)
         try:
             for perm_id in current_user_permission_ids:
-                if perm_id not in permission_ids:
                     # if self.sys_user_mapper.check_user_permission(user_id, perm_id):
                     self.sys_user_mapper.delete_user_permission(user_id, perm_id)
 
             for perm_id in permission_ids:
-                if perm_id not in current_user_permission_ids:
                     # if not self.sys_user_mapper.check_user_permission(user_id, perm_id):
                     self.sys_user_mapper.add_user_permission(user_id, perm_id)
         except Exception as e:

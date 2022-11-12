@@ -7,6 +7,8 @@
 
 import time
 import os
+import random
+
 import psutil
 
 
@@ -103,7 +105,7 @@ class IdWorker(object):
 
 
 def generate_id():
-    id_worker = IdWorker(datacenter_id=1, worker_id=1)
+    id_worker = IdWorker(datacenter_id=random.randint(0, 10), worker_id=random.randint(0, 10))
     return id_worker.get_id()
 
 

@@ -108,7 +108,8 @@ class SysUserMapper:
         :return:
         """
         try:
-            sys_user_permission = SysUserPermission().create(user_id=user_id, perm_id=perm_id)
+            sys_user_permission = SysUserPermission(user_id=user_id, perm_id=perm_id)
+            sys_user_permission.save(force_insert=True)
         except Exception as e:
             sys_user_permission = None
             logger.error(e)
