@@ -12,12 +12,14 @@ from api.system.sys_user_api import user_router
 from common.db import db, db_state_default
 from api.system.sys_login_api import login_router
 from api.system.sys_permission_api import perm_router
+from api.event.event_api import event_router
 api_router = APIRouter()
 
 # router注册
 api_router.include_router(user_router, tags=["用户管理"])
 api_router.include_router(login_router, tags=["登录授权"])
 api_router.include_router(perm_router, tags=["权限管理"])
+api_router.include_router(event_router, tags=["养护事件管理"])
 
 
 # 请求前连接数据库
