@@ -102,3 +102,20 @@ async def get_event_by_id(event_id: str):
     except Exception as e:
         logger.error(e)
         raise APIException(404, "不存在对应事件")
+
+
+@event_router.post("/eventuser", dependencies=[Depends(get_db)])  # 上传图片，建立新养护事件
+async def new_event(event_id:str, userlist: List[str]):
+    try:
+        img_service.new_event_user(event_id, userlist)
+        return create_response(200, "新建事件员工成功", {})
+    except:
+        raise APIException(404, "事件信息输入不全或格式错误")
+
+
+@event_router.get("/eventuser/{user_id}", dependencies=[Depends(get_db)])
+async def get_event_by_user(user_id: str):
+    # try:
+    data = img_service.search_event_by_user(user_id)
+    print(data)
+    return create_response(200, "事件信息获取成功", data)

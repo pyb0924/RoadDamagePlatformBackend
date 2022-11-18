@@ -15,6 +15,16 @@ class Event(Model):
         table_name = 'event'
 
 
+class Event_user(Model):
+    idevent_user = IntegerField(null=False, primary_key=True)
+    event_id = BigIntegerField(null=False)
+    user_id = BigIntegerField(null=False)
+
+    class Meta:
+        database = db
+        table_name = 'event_user'
+
+
 class Img(Model):
     img_id = BigIntegerField(null=False, primary_key=True)
     log_id = BigIntegerField(null=False)

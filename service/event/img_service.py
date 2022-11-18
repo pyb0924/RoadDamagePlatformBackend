@@ -124,3 +124,23 @@ def get_img_by_log(log_id):
         imagename = str(i.img_id) + '.jpg'
         image_list.append(image_path + imagename)
     return image_list
+
+
+@db.atomic()
+def new_event_user(event_id, userlist):
+    data = [{
+        'event_id': event_id,
+        'user_id': i
+    } for i in userlist]
+    Event_user.insert_many(data).execute()
+    return '成功'
+
+
+@db.atomic()
+def search_event_by_user(user_id):
+    sqlcode = 'select event.* from event_user join event on event_user.event_id=event.event_id where user_id=%s'
+    query = Event_user.raw(sqlcode, user_id).dicts()
+    event_list = []
+    for i in query:
+        event_list.append(i)
+    return event_list
