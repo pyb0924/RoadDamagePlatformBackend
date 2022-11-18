@@ -109,13 +109,17 @@ async def new_event(event_id:str, userlist: List[str]):
     try:
         img_service.new_event_user(event_id, userlist)
         return create_response(200, "新建事件员工成功", {})
-    except:
+    except Exception as e:
+        logger.error(e)
         raise APIException(404, "事件信息输入不全或格式错误")
 
 
 @event_router.get("/eventuser/{user_id}", dependencies=[Depends(get_db)])
 async def get_event_by_user(user_id: str):
-    # try:
-    data = img_service.search_event_by_user(user_id)
-    print(data)
-    return create_response(200, "事件信息获取成功", data)
+    try:
+        data = img_service.search_event_by_user(user_id)
+        print(data)
+        return create_response(200, "事件信息获取成功", data)
+    except Exception as e:
+        logger.error(e)
+        raise APIException(404, "事件信息输入不全或格式错误")
