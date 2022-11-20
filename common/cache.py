@@ -5,6 +5,7 @@
 # @desc    :
 
 import redis as r
+from config import REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB_NB
 
-redis_pool = r.ConnectionPool(host='127.0.0.1', port=6379, password='', db=0)
+redis_pool = r.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, db=REDIS_DB_NB)
 redis_manager = r.Redis(connection_pool=redis_pool)

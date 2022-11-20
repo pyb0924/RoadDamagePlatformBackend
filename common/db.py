@@ -6,8 +6,8 @@
 
 from contextvars import ContextVar
 import peewee
+from config import *
 from peewee import MySQLDatabase
-
 db_state_default = {"closed": None, "conn": None, "ctx": None, "transactions": None}
 db_state = ContextVar("db_state", default=db_state_default.copy())
 
@@ -24,6 +24,6 @@ class PeeweeConnectionState(peewee._ConnectionState):
         return self._state.get()[name]
 
 
-db = MySQLDatabase("itsm-admin", host='localhost', port=3306, user='root', password='123456', autocommit=True)
+db = MySQLDatabase(DB_NAME, host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASSWORD, autocommit=True)
 
 db._state = PeeweeConnectionState()

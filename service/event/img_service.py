@@ -2,6 +2,7 @@ import peewee
 from model.event.sys_event import *
 from common.snow_flake import generate_id
 from datetime import datetime
+from config import CDN_PREFIX
 
 image_path = './image/'
 
@@ -121,8 +122,8 @@ def get_img_by_log(log_id):
     result = Img.select().where(Img.log_id == log_id)
     image_list = []
     for i in result:
-        imagename = str(i.img_id) + '.jpg'
-        image_list.append(image_path + imagename)
+        imagename = f'{i.img_id}.jpg'
+        image_list.append(CDN_PREFIX + imagename)
     return image_list
 
 

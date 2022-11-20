@@ -24,7 +24,8 @@ async def reset_db_state():
 
 def get_db(db_state=Depends(reset_db_state)):
     try:
-        db.connect()
+        if db.close():
+            db.connect()
         yield
     finally:
         if not db.is_closed():

@@ -21,7 +21,7 @@ login_service = LoginService()
 
 
 @login_router.post("/login", name="用户登陆", dependencies=[Depends(get_db)])
-async def login_for_access_token(user_login: OAuth2PasswordRequestForm = Depends()):
+def login_for_access_token(user_login: OAuth2PasswordRequestForm = Depends()):
     """
     登录并获取获取token
     """
@@ -37,7 +37,7 @@ async def login_for_access_token(user_login: OAuth2PasswordRequestForm = Depends
 
 
 @login_router.post("/refresh", name="刷新token", dependencies=[Depends(AuthenticationChecker)])
-async def fresh_token(token: str = Depends(security.oauth2_scheme)):
+def fresh_token(token: str = Depends(security.oauth2_scheme)):
     """
     刷新token
     :param token:
