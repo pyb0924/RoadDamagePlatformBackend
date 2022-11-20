@@ -129,8 +129,17 @@ def new_event(event_id: str, userlist: List[str]):
 def get_event_by_user(user_id: str):
     try:
         data = img_service.search_event_by_user(user_id)
-        print(data)
         return create_response(200, "事件信息获取成功", data)
+    except Exception as e:
+        logger.error(e)
+        raise APIException(404, "事件信息输入不全或格式错误")
+
+
+@event_router.get("/logevent/{event_id}", dependencies=[Depends(get_db)])
+def get_log_by_event(event_id: str):
+    try:
+        data = img_service.search_log_by_event(event_id)
+        return create_response(200, "日志信息获取成功", data)
     except Exception as e:
         logger.error(e)
         raise APIException(404, "事件信息输入不全或格式错误")

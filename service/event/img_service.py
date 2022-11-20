@@ -145,3 +145,12 @@ def search_event_by_user(user_id):
     for i in query:
         event_list.append(i)
     return event_list
+
+@db.atomic()
+def search_log_by_event(event_id):
+    sqlcode = 'select * from log where event_id=%s'
+    query = Log.raw(sqlcode, event_id).dicts()
+    log_list = []
+    for i in query:
+        log_list.append(i)
+    return log_list
