@@ -41,15 +41,27 @@ def new_event(type, longitude, latitude, position, user, notes, filenamelist):
 
 
 @db.atomic()
-def search_event(type=None, min_longitude=None, max_longitude=None, min_latitude=None, max_latitude=None, position=None,
-                 status=None):
-    sqlcode = "select * from event"
+def search_event(user_id=None, type=None, min_longitude=None, max_longitude=None, min_latitude=None, max_latitude=None,
+                 position=None, status=None, offset=None, limit=None):
     param = []
     f = True
-    if type is not None:
-        sqlcode += " where type=%s"
+    if user_id is not None:
+        sqlcode = "select event.* from event join log on event.event_id = log.event_id where log.user = %s"
+
+        param.append(user_id)
         f = False
-        param.append(type)
+    else:
+        sqlcode = "select * from event"
+
+    if type is not None:
+        type = [str(x) for x in type]
+        ss = ','.join(type)
+        if f:
+            sqlcode += f" where type in ({ss})"
+            f = False
+        else:
+            sqlcode += f" and type in ({ss})"
+        f = False
     if min_longitude is not None:
         if f:
             sqlcode += " where longitude>%s and longitude<%s and latitude>%s and latitude<%s"
@@ -69,19 +81,23 @@ def search_event(type=None, min_longitude=None, max_longitude=None, min_latitude
         position = f'%{position}%'
         param.append(position)
     if status is not None:
+        status = [str(x) for x in status]
+        strstatus = ','.join(status)
         if f:
-            sqlcode += " where status=%s"
+            sqlcode += f" where status in ({strstatus})"
         else:
-            sqlcode += " and status=%s"
-        param.append(status)
+            sqlcode += f" and status in ({strstatus})"
+    total = 0
     if len(param) == 0:
         query = Event.raw(sqlcode).dicts()
     else:
         query = Event.raw(sqlcode, param).dicts()
+    total = len(query)
     event_list = []
-    for i in query:
+    for i in query[offset:offset+limit] if offset is not None else query:
         event_list.append(i)
-    return event_list
+    return event_list, total
+
 
 
 def valid(old_status, status):
