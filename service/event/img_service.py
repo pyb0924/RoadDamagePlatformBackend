@@ -74,10 +74,10 @@ def search_event(user_id=None, type=None, min_longitude=None, max_longitude=None
         param.append(max_latitude)
     if position is not None:
         if f:
-            sqlcode += ' where position like %s'
+            sqlcode += ' where address like %s'
             f = False
         else:
-            sqlcode += ' and position like %s'
+            sqlcode += ' and address like %s'
         position = f'%{position}%'
         param.append(position)
     if status is not None:
