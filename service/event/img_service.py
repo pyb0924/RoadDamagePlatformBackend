@@ -95,7 +95,7 @@ def search_event(user_id=None, type=None, min_longitude=None, max_longitude=None
     total = len(query)
     event_list = []
     for i in query[offset * limit:offset * limit + limit] if offset is not None else query:
-        i['event_id'] = str(i['ecent_id'])
+        i['event_id'] = str(i['event_id'])
         event_list.append(i)
     return event_list, total
 
