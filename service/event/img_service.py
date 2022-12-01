@@ -94,7 +94,7 @@ def search_event(user_id=None, type=None, min_longitude=None, max_longitude=None
         query = Event.raw(sqlcode, param).dicts()
     total = len(query)
     event_list = []
-    for i in query[offset * limit:offset * limit + limit] if offset is not None else query:
+    for i in query[(offset-1) * limit:(offset-1) * limit + limit] if offset is not None else query:
         time_sqlcode = 'select datetime from log where event_id = %s order by datetime'
         time_query = Log.raw(time_sqlcode, i['event_id']).dicts()
         i['event_id'] = str(i['event_id'])
