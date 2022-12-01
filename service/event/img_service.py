@@ -20,7 +20,7 @@ def new_event(type, longitude, latitude, position, user, notes, filenamelist):
                  type=type,
                  longitude=longitude,
                  latitude=latitude,
-                 position=position,
+                 address=position,
                  status=1).execute()
 
     Log.insert(log_id=log_id,
