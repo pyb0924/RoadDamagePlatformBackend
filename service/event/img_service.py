@@ -94,7 +94,7 @@ def search_event(user_id=None, type=None, min_longitude=None, max_longitude=None
         query = Event.raw(sqlcode, param).dicts()
     total = len(query)
     event_list = []
-    for i in query[offset:offset+limit] if offset is not None else query:
+    for i in query[offset*limit:offset*limit+limit] if offset is not None else query:
         event_list.append(i)
     return event_list, total
 
