@@ -94,10 +94,10 @@ def search_event(user_id=None, type=None, min_longitude=None, max_longitude=None
         query = Event.raw(sqlcode, param).dicts()
     total = len(query)
     event_list = []
-    for i in query[offset*limit:offset*limit+limit] if offset is not None else query:
+    for i in query[offset * limit:offset * limit + limit] if offset is not None else query:
+        i['event_id'] = str(i['ecent_id'])
         event_list.append(i)
     return event_list, total
-
 
 
 def valid(old_status, status):
@@ -144,23 +144,15 @@ def get_img_by_log(log_id):
 
 
 @db.atomic()
-def new_event_user(event_id, userlist):
-    data = [{
-        'event_id': event_id,
-        'user_id': i
-    } for i in userlist]
-    Event_user.insert_many(data).execute()
-    return '成功'
-
-
-@db.atomic()
 def search_event_by_user(user_id):
     sqlcode = 'select event.* from event_user join event on event_user.event_id=event.event_id where user_id=%s'
     query = Event_user.raw(sqlcode, user_id).dicts()
     event_list = []
     for i in query:
+        i['event_id'] = str(i['event_id'])
         event_list.append(i)
     return event_list
+
 
 @db.atomic()
 def search_log_by_event(event_id):
