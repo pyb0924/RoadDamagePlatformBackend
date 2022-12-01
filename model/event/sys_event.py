@@ -7,7 +7,7 @@ class Event(Model):
     type = IntegerField(null=False)
     longitude = FloatField(null=False)
     latitude = FloatField(null=False)
-    position = CharField(max_length=45, null=False)
+    address = CharField(max_length=45, null=False)
     status = IntegerField(null=False)
 
     class Meta:
