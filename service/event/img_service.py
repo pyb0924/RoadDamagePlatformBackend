@@ -98,8 +98,8 @@ def search_event(user_id=None, type=None, min_longitude=None, max_longitude=None
         time_sqlcode = 'select datetime from log where event_id = %s order by datetime'
         time_query = Log.raw(time_sqlcode, i['event_id']).dicts()
         i['event_id'] = str(i['event_id'])
-        i['create_time'] = time_query[0]['datetime']
-        i['update_time'] = time_query[-1]['datetime']
+        i['create_time'] = str(time_query[0]['datetime'])
+        i['update_time'] = str(time_query[-1]['datetime'])
         event_list.append(i)
     return event_list, total
 
