@@ -164,5 +164,6 @@ def search_log_by_event(event_id):
     query = Log.raw(sqlcode, event_id).dicts()
     log_list = []
     for i in query:
+        i['datetime'] = str(i['datetime'])
         log_list.append(i)
     return log_list
