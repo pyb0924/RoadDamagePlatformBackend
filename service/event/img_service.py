@@ -46,7 +46,7 @@ def search_event(user_id=None, type=None, min_longitude=None, max_longitude=None
     param = []
     f = True
     if user_id is not None:
-        sqlcode = "select event.* from event join log on event.event_id = log.event_id where log.user = %s"
+        sqlcode = "select distinct event.* from event join log on event.event_id = log.event_id where log.user = %s"
 
         param.append(user_id)
         f = False
