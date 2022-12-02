@@ -98,7 +98,7 @@ async def update_event(event_id: str, status: int = Form(...), user_id: str = Fo
 #         raise APIException(404, "事件信息输入不全或格式错误")
 
 
-@event_router.get("/log/{log_id}", dependencies=[Depends(get_db)])  # 获得日志对应图片链接
+@event_router.get("/image/{log_id}", dependencies=[Depends(get_db)])  # 获得日志对应图片链接
 def get_image(log_id: str):
     try:
         img_list = img_service.get_img_by_log(log_id)
