@@ -64,7 +64,7 @@ def search_event(user_id: str = None, type: Optional[List[int]] = Query(None), m
 async def update_event(event_id: str, status: int = Form(...), user_id: str = Form(...),
                        notes: Optional[str] = Form(None), file: Optional[List[UploadFile]] = File(None)):
     try:
-
+        filenamelist = None
         if file is not None:
             filenamelist = []
             for a in file:

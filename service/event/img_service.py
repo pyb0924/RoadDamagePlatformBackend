@@ -57,36 +57,36 @@ def search_event(user_id=None, type=None, min_longitude=None, max_longitude=None
         type = [str(x) for x in type]
         ss = ','.join(type)
         if f:
-            sqlcode += f" where type in ({ss})"
+            sqlcode += f" where event.type in ({ss})"
             f = False
         else:
-            sqlcode += f" and type in ({ss})"
+            sqlcode += f" and event.type in ({ss})"
         f = False
     if min_longitude is not None:
         if f:
-            sqlcode += " where longitude>%s and longitude<%s and latitude>%s and latitude<%s"
+            sqlcode += " where event.longitude>%s and event.longitude<%s and event.latitude>%s and event.latitude<%s"
             f = False
         else:
-            sqlcode += " and longitude>%s and longitude<%s and latitude>%s and latitude<%s"
+            sqlcode += " and event.longitude>%s and event.longitude<%s and event.latitude>%s and event.latitude<%s"
         param.append(min_longitude)
         param.append(max_longitude)
         param.append(min_latitude)
         param.append(max_latitude)
     if position is not None:
         if f:
-            sqlcode += ' where address like %s'
+            sqlcode += ' where event.address like %s'
             f = False
         else:
-            sqlcode += ' and address like %s'
+            sqlcode += ' and event.address like %s'
         position = f'%{position}%'
         param.append(position)
     if status is not None:
         status = [str(x) for x in status]
         strstatus = ','.join(status)
         if f:
-            sqlcode += f" where status in ({strstatus})"
+            sqlcode += f" where event.status in ({strstatus})"
         else:
-            sqlcode += f" and status in ({strstatus})"
+            sqlcode += f" and event.status in ({strstatus})"
     total = 0
     if len(param) == 0:
         query = Event.raw(sqlcode).dicts()
