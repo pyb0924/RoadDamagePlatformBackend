@@ -4,7 +4,7 @@ from fastapi import Depends, APIRouter
 from fastapi import FastAPI, File, UploadFile, Query, Form
 from typing import List, Optional
 
-from api.interceptor import get_db
+from api.interceptor import get_db, AuthenticationChecker
 from model.event.sys_event import *
 from common.snow_flake import generate_id
 
@@ -24,9 +24,9 @@ image_path = './image/'
 # now_image_path = './'
 
 
-@event_router.post("", dependencies=[Depends(get_db)])  # 上传图片，建立新养护事件
-async def new_event(type: int, longitude: float, latitude: float, address: str, user_id: str, notes: str,
-                    file: List[UploadFile] = File(...)):
+@event_router.post("", dependencies=[Depends(get_db), Depends(AuthenticationChecker("event:add"))])  # 上传图片，建立新养护事件
+async def new_event(longitude: float, latitude: float, address: str, user_id: str, notes: str,
+                    file: List[UploadFile] = File(...), type: int = 0):
     try:
         filenamelist = []
         for a in file:
@@ -46,7 +46,7 @@ async def new_event(type: int, longitude: float, latitude: float, address: str, 
         raise APIException(404, "事件信息输入不全或格式错误")
 
 
-@event_router.get("", dependencies=[Depends(get_db)])  # 按事件的完工条件或位置查询
+@event_router.get("", dependencies=[Depends(get_db), Depends(AuthenticationChecker("event"))])  # 按事件的完工条件或位置查询
 def search_event(user_id: str = None, type: Optional[List[int]] = Query(None), min_longitude: float = None,
                  max_longitude: float = None, min_latitude: float = None, max_latitude: float = None,
                  address: str = None, status: Optional[List[int]] = Query(None), offset: int = None,
@@ -60,7 +60,7 @@ def search_event(user_id: str = None, type: Optional[List[int]] = Query(None), m
         raise APIException(404, "事件信息输入不全或格式错误")
 
 
-@event_router.put("/{event_id}", dependencies=[Depends(get_db)])  # 修改事件状态
+@event_router.put("/{event_id}", dependencies=[Depends(get_db), Depends(AuthenticationChecker("event:edit"))])  # 修改事件状态
 async def update_event(event_id: str, status: int = Form(...), user_id: str = Form(...),
                        notes: Optional[str] = Form(None), file: Optional[List[UploadFile]] = File(None)):
     try:
@@ -98,7 +98,8 @@ async def update_event(event_id: str, status: int = Form(...), user_id: str = Fo
 #         raise APIException(404, "事件信息输入不全或格式错误")
 
 
-@event_router.get("/image/{log_id}", dependencies=[Depends(get_db)])  # 获得日志对应图片链接
+@event_router.get("/image/{log_id}",
+                  dependencies=[Depends(get_db), Depends(AuthenticationChecker("event"))])  # 获得日志对应图片链接
 def get_image(log_id: str):
     try:
         img_list = img_service.get_img_by_log(log_id)
@@ -108,7 +109,7 @@ def get_image(log_id: str):
         raise APIException(404, "不存在对应日志")
 
 
-@event_router.get("/{event_id}", dependencies=[Depends(get_db)])
+@event_router.get("/{event_id}", dependencies=[Depends(get_db), Depends(AuthenticationChecker("event"))])
 def get_event_by_id(event_id: str):
     try:
         data = vars(Event.get(Event.event_id == event_id))['__data__']
@@ -118,7 +119,7 @@ def get_event_by_id(event_id: str):
         raise APIException(404, "不存在对应事件")
 
 
-@event_router.get("/log/{event_id}", dependencies=[Depends(get_db)])
+@event_router.get("/log/{event_id}", dependencies=[Depends(get_db), Depends(AuthenticationChecker("event"))])
 def get_log_by_event(event_id: str):
     try:
         data = img_service.search_log_by_event(event_id)
