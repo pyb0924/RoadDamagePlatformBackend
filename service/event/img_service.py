@@ -160,14 +160,12 @@ def search_event_by_user(user_id):
 
 @db.atomic()
 def search_log_by_event(event_id):
-    sqlcode = 'select * from log where event_id=%s order by datetime desc'
+    sqlcode = 'select log_id,event_id,datetime,new_status,old_status,username,event_id from log join sys_users on log.user=sys_users.user_id where event_id=%s order by datetime desc'
     query = Log.raw(sqlcode, event_id).dicts()
     log_list = []
     for i in query:
-        i["user_id"] = i.pop("user")
         i['datetime'] = str(i['datetime'])
         i['event_id'] = str(i['event_id'])
         i['log_id'] = str(i['log_id'])
-        i['user_id'] = str(i['user_id'])
         log_list.append(i)
     return log_list
