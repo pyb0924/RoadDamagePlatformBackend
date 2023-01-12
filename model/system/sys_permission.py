@@ -21,3 +21,8 @@ class SysPermission(BaseModel):
     class Meta:
         database = db
         table_name = 'sys_permissions'
+
+
+if __name__ == '__main__':
+    sys_perm = SysPermission(perm_name="数据地图", type=0, identifier="map")
+    sys_perm.save(force_insert=True)

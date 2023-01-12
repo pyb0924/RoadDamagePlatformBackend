@@ -8,7 +8,7 @@ from model.system.sys_permission import SysPermission
 from model.system.sys_user import SysUser
 from model.system.sys_user_permission import SysUserPermission
 from common.log import logger
-
+from fastapi.responses import FileResponse
 
 class SysUserMapper:
     # TODO: 统一Datetime format方法

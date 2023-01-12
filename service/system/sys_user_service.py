@@ -55,6 +55,10 @@ class UserService:
             user_dict["user_id"] = str(u['user_id'])
             user_dict["username"] = u['username']
             user_dict["is_active"] = u['is_active']
+            user_dict["nickname"] = u['nickname']
+            user_dict["avatar"] = u['avatar']
+            user_dict["phone"] = u['phone']
+            user_dict["email"] = u['email']
             if u['perm_id']:
                 user_dict["permission_ids"].append(str(u['perm_id']))
                 user_dict["permissions"].append(u['identifier'])
