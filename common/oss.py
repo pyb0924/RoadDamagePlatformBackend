@@ -6,6 +6,7 @@
 
 from qiniu import Auth, put_file, etag
 from config import *
+from common.mq import produce
 
 # 构建鉴权对象
 q = Auth(ACCESS_KEY, SECRET_KEY)
@@ -24,3 +25,8 @@ def upload_file_oss(localfile, key):
     print(info)
     assert ret['key'] == key
     assert ret['hash'] == etag(localfile)
+    produce(CDN_PREFIX + key)
+
+
+if __name__ == '__main__':
+    upload_file_oss("../image/IMG_2932.jpg", "IMG_2932.jpg")

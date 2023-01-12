@@ -5,20 +5,27 @@
 # @desc    : 配置文件
 
 # MySQL 配置
-DB_HOST = "127.0.0.1"
+DB_HOST = ""
 DB_PORT = 3306
 DB_NAME = ""
-DB_USER = "root"
-DB_PASSWORD = "123456"
+DB_USER = ""
+DB_PASSWORD = ""
 
 # Redis 配置
-REDIS_HOST = "127.0.0.1"
-REDIS_PORT = 6379
+REDIS_HOST = ""
+REDIS_PORT = 6778
 REDIS_PASSWORD = ""
-REDIS_DB_NB = 0
+REDIS_DB_NB = ""
 
 # 七牛云 配置
-ACCESS_KEY = ""
-SECRET_KEY = ""
-BUCKET_NAME = ""
+ACCESS_KEY = ''
+SECRET_KEY = ''
+BUCKET_NAME = ''
 CDN_PREFIX = ""
+
+# RabbitMQ 配置
+MQ_HOST = ""
+MQ_PORT = ""
+MQ_VIRTUAL_HOST = ""
+MQ_USER = ""
+MQ_PASSWORD = ""

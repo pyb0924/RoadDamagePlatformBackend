@@ -3,7 +3,7 @@ import threading
 from fastapi import Depends, APIRouter
 from fastapi import FastAPI, File, UploadFile, Query, Form
 from typing import List, Optional
-
+from schema.event import EventEdit
 from api.interceptor import get_db, AuthenticationChecker
 from model.event.sys_event import *
 from common.snow_flake import generate_id
@@ -15,6 +15,7 @@ from service.event import img_service
 from common.log import logger
 
 from common.oss import upload_file_oss
+
 
 event_router = APIRouter(prefix="/event", tags=["养护事件管理"])
 image_path = './image/'
@@ -76,6 +77,20 @@ async def update_event(event_id: str, status: int = Form(...), user_id: str = Fo
                 threading.Thread(target=upload_file_oss, args=(path, f'{img_id}.jpg')).start()
 
         p = img_service.update_status(event_id, status, user_id, notes, filenamelist)
+        if p:
+            return create_response(200, "事件状态修改成功", {})
+        else:
+            raise APIException(404, "非法修改状态")
+    except Exception as e:
+        logger.error(e)
+        raise APIException(404, "事件信息输入不全或格式错误")
+
+
+@event_router.put("/web/{event_id}",
+                  dependencies=[Depends(get_db), Depends(AuthenticationChecker("event:edit"))])  # 修改事件状态
+async def update_event(event_id: str, event_edit: EventEdit):
+    try:
+        p = img_service.update_status(event_id, event_edit.status, event_edit.user_id, event_edit.notes)
         if p:
             return create_response(200, "事件状态修改成功", {})
         else:
